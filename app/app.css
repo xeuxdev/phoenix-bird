@@ -1,15 +1,899 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-orbitron: "Orbitron", monospace;
+  --font-rajdhani: "Rajdhani", sans-serif;
+  --color-cyan: #00e5ff;
+  --color-cyan-dim: #00b4cc;
+  --color-orange: #ff6d00;
+  --color-orange-bright: #ff9500;
+  --color-deep-space: #020a14;
+  --color-panel-bg: rgba(2, 18, 32, 0.72);
+  --color-panel-border: rgba(0, 229, 255, 0.25);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  margin: 0;
+  padding: 0;
+  background: #020a14;
+  color: #e0f7fa;
+  font-family: "Rajdhani", "Inter", sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  cursor: none;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+/* ─── Custom Cursor ─────────────────────────────────────────── */
+.cursor-dot {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: #ff9500;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 8px #ff9500,
+    0 0 20px #ff6d00;
+  transition: transform 0.05s;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid rgba(0, 229, 255, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.3s,
+    height 0.3s,
+    opacity 0.3s;
+}
+
+.ember {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9997;
+  transform: translate(-50%, -50%);
+  animation: ember-fade 0.6s ease-out forwards;
+}
+
+@keyframes ember-fade {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -100%) scale(0.2);
+  }
+}
+
+/* ─── Stars Background ──────────────────────────────────────── */
+.stars-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: star-twinkle var(--dur, 3s) ease-in-out infinite var(--delay, 0s);
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: var(--min-op, 0.2);
+  }
+  50% {
+    opacity: var(--max-op, 1);
+  }
+}
+
+/* ─── HUD Layout ────────────────────────────────────────────── */
+.hud-viewport {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ─── Frosted Glass Panel ───────────────────────────────────── */
+.glass-panel {
+  background: rgba(2, 18, 32, 0.72);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.04) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.glass-panel .panel-header {
+  font-family: "Orbitron", monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #00e5ff;
+  text-transform: uppercase;
+  padding: 8px 14px 6px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-header .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 6px #00e5ff;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px #00e5ff;
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 2px #00e5ff;
+  }
+}
+
+/* ─── Metric Row ─────────────────────────────────────────────── */
+.metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 14px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+  gap: 12px;
+}
+
+.metric-label {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: rgba(0, 229, 255, 0.55);
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.metric-value {
+  font-family: "Orbitron", monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ff9500;
+  text-align: right;
+}
+
+.metric-bar-wrap {
+  flex: 1;
+  height: 3px;
+  background: rgba(0, 229, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 8px;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #00b4cc, #00e5ff);
+  box-shadow: 0 0 4px #00e5ff;
+  animation: bar-load 1.8s ease-out both;
+}
+
+@keyframes bar-load {
+  from {
+    width: 0;
+  }
+}
+
+.metric-bar-fill.orange {
+  background: linear-gradient(90deg, #ff6d00, #ff9500);
+  box-shadow: 0 0 4px #ff9500;
+}
+
+/* ─── Body Label Lines ───────────────────────────────────────── */
+.label-line-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.label-connector {
+  stroke: #00e5ff;
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 4 3;
+  animation: dash-flow 3s linear infinite;
+  opacity: 0.7;
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+.body-label-box {
+  position: absolute;
+  background: rgba(0, 13, 26, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  border-radius: 4px;
+  padding: 3px 8px;
+  pointer-events: none;
+}
+
+.body-label-title {
+  font-family: "Orbitron", monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.15em;
+  color: #00e5ff;
+  text-transform: uppercase;
+}
+
+.body-label-sub {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(255, 149, 0, 0.9);
+}
+
+/* ─── Radial Menu Arc ────────────────────────────────────────── */
+.radial-arc {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0, 229, 255, 0.18);
+  pointer-events: none;
+  animation: arc-spin 30s linear infinite;
+}
+
+@keyframes arc-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.radial-tick {
+  position: absolute;
+  width: 2px;
+  height: 10px;
+  background: #00e5ff;
+  box-shadow: 0 0 4px #00e5ff;
+  transform-origin: bottom center;
+}
+
+.radial-label {
+  font-family: "Orbitron", monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: #00e5ff;
+  position: absolute;
+  white-space: nowrap;
+  text-shadow: 0 0 8px #00e5ff;
+}
+
+/* ─── Control Panel ──────────────────────────────────────────── */
+.control-panel {
+  position: absolute;
+  bottom: 28px;
+  left: 28px;
+  width: 280px;
+  z-index: 20;
+}
+
+.control-section {
+  padding: 10px 14px;
+}
+
+.control-title {
+  font-family: "Orbitron", monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: rgba(0, 229, 255, 0.5);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.pose-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pose-label {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.75rem;
+  color: rgba(0, 229, 255, 0.7);
+  letter-spacing: 0.1em;
+}
+
+.toggle-switch {
+  width: 32px;
+  height: 16px;
+  background: rgba(0, 229, 255, 0.15);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+}
+
+.toggle-switch.active {
+  background: rgba(0, 229, 255, 0.25);
+  border-color: #00e5ff;
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.4);
+}
+
+.toggle-knob {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  top: 2px;
+  transition: left 0.2s;
+}
+
+.toggle-switch:not(.active) .toggle-knob {
+  left: 2px;
+  background: rgba(0, 229, 255, 0.35);
+}
+.toggle-switch.active .toggle-knob {
+  left: 18px;
+  background: #00e5ff;
+  box-shadow: 0 0 6px #00e5ff;
+}
+
+.dropdown-control {
+  background: rgba(0, 229, 255, 0.05);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.dropdown-control:hover {
+  border-color: rgba(0, 229, 255, 0.5);
+  background: rgba(0, 229, 255, 0.1);
+}
+
+.dropdown-control span {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.75rem;
+  color: #00e5ff;
+  letter-spacing: 0.1em;
+}
+
+.dropdown-control .arrow {
+  font-size: 0.6rem;
+  color: rgba(0, 229, 255, 0.5);
+}
+
+.speed-row {
+  display: flex;
+  gap: 6px;
+}
+
+.speed-btn {
+  font-family: "Orbitron", monospace;
+  font-size: 0.58rem;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  background: rgba(0, 229, 255, 0.05);
+  color: rgba(0, 229, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+.speed-btn:hover,
+.speed-btn.active {
+  background: rgba(0, 229, 255, 0.18);
+  border-color: #00e5ff;
+  color: #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+.timeline-bar {
+  height: 3px;
+  background: rgba(0, 229, 255, 0.1);
+  border-radius: 2px;
+  position: relative;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.timeline-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #00b4cc, #00e5ff);
+  box-shadow: 0 0 6px #00e5ff;
+  border-radius: 2px;
+  transition: width 0.1s;
+}
+
+.timeline-thumb {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #00e5ff;
+  border-radius: 50%;
+  top: -2.5px;
+  box-shadow: 0 0 6px #00e5ff;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.play-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.1);
+  color: #00e5ff;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.play-btn:hover {
+  background: rgba(0, 229, 255, 0.25);
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+.play-btn.main {
+  width: 34px;
+  height: 34px;
+  background: rgba(0, 229, 255, 0.18);
+  font-size: 0.85rem;
+}
+
+.time-display {
+  font-family: "Orbitron", monospace;
+  font-size: 0.6rem;
+  color: rgba(0, 229, 255, 0.6);
+  margin-left: auto;
+}
+
+/* ─── Scan Lines Overlay ──────────────────────────────────────── */
+.scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.04) 2px,
+    rgba(0, 0, 0, 0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ─── Holographic Glow Flash ──────────────────────────────────── */
+.holo-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 229, 255, 0.03) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: holo-pulse 4s ease-in-out infinite;
+  z-index: 4;
+}
+
+@keyframes holo-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ─── Corner Brackets ─────────────────────────────────────────── */
+.corner-bracket {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.corner-bracket::before,
+.corner-bracket::after {
+  content: "";
+  position: absolute;
+  background: #00e5ff;
+  box-shadow: 0 0 6px #00e5ff;
+}
+
+.corner-bracket.tl {
+  top: 16px;
+  left: 16px;
+}
+.corner-bracket.tl::before {
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+}
+.corner-bracket.tl::after {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.corner-bracket.tr {
+  top: 16px;
+  right: 16px;
+}
+.corner-bracket.tr::before {
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+}
+.corner-bracket.tr::after {
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.corner-bracket.bl {
+  bottom: 16px;
+  left: 16px;
+}
+.corner-bracket.bl::before {
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+}
+.corner-bracket.bl::after {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+
+.corner-bracket.br {
+  bottom: 16px;
+  right: 16px;
+}
+.corner-bracket.br::before {
+  bottom: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+}
+.corner-bracket.br::after {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+}
+
+/* ─── Phoenix Image ─────────────────────────────────────────── */
+.phoenix-container {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phoenix-image {
+  width: 600px;
+  height: 600px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 30px rgba(255, 109, 0, 0.5))
+    drop-shadow(0 0 60px rgba(0, 229, 255, 0.2));
+  animation: phoenix-float 6s ease-in-out infinite;
+}
+
+@keyframes phoenix-float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(-1deg);
+    filter: drop-shadow(0 0 30px rgba(255, 109, 0, 0.5))
+      drop-shadow(0 0 60px rgba(0, 229, 255, 0.2));
+  }
+  50% {
+    transform: translateY(-14px) rotate(1deg);
+    filter: drop-shadow(0 0 50px rgba(255, 109, 0, 0.7))
+      drop-shadow(0 0 80px rgba(0, 229, 255, 0.35));
+  }
+}
+
+.phoenix-glow-ring {
+  position: absolute;
+  width: 360px;
+  height: 160px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 109, 0, 0.2);
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow:
+    0 0 40px rgba(255, 109, 0, 0.15),
+    inset 0 0 40px rgba(255, 109, 0, 0.05);
+  animation: ring-pulse 3s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ─── Side Panels ───────────────────────────────────────────── */
+.left-panel-group {
+  position: absolute;
+  left: 28px;
+  /* Start just below the top status bar; bottom edge is constrained
+     so it never overlaps the control panel (≈270 px tall at bottom: 28px) */
+  top: 40px;
+  bottom: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 220px;
+  z-index: 15;
+  overflow: hidden;
+}
+
+.right-panel-group {
+  position: absolute;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-60%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 220px;
+  z-index: 15;
+}
+
+/* ─── Abilities Grid ─────────────────────────────────────────── */
+.ability-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 10px 14px;
+}
+
+.ability-card {
+  background: rgba(0, 229, 255, 0.04);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 6px;
+  padding: 7px 8px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.ability-card:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.ability-icon {
+  font-size: 1rem;
+  margin-bottom: 3px;
+}
+
+.ability-name {
+  font-family: "Orbitron", monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+  color: #00e5ff;
+  text-transform: uppercase;
+}
+
+.ability-power {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.65rem;
+  color: #ff9500;
+  font-weight: 600;
+}
+
+/* ─── Chronicle Entry ────────────────────────────────────────── */
+.chronicle-entry {
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.07);
+}
+
+.chronicle-date {
+  font-family: "Orbitron", monospace;
+  font-size: 0.48rem;
+  color: rgba(255, 149, 0, 0.6);
+  letter-spacing: 0.15em;
+  margin-bottom: 2px;
+}
+
+.chronicle-text {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.68rem;
+  color: rgba(0, 229, 255, 0.75);
+  line-height: 1.4;
+}
+
+/* ─── Status Bar ─────────────────────────────────────────────── */
+.status-bar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(2, 18, 32, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 30px;
+  padding: 6px 20px;
+  backdrop-filter: blur(12px);
+}
+
+.status-title {
+  font-family: "Orbitron", monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: #00e5ff;
+  text-shadow: 0 0 10px #00e5ff;
+}
+
+.status-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(0, 229, 255, 0.25);
+}
+
+.status-badge {
+  font-family: "Rajdhani", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: rgba(0, 229, 255, 0.6);
+}
+
+.status-badge .online {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #00ff88;
+  margin-right: 5px;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ─── Glitch Text ─────────────────────────────────────────────── */
+.glitch {
+  animation: glitch-anim 6s infinite;
+}
+
+@keyframes glitch-anim {
+  0%,
+  90%,
+  100% {
+    transform: none;
+    text-shadow: 0 0 10px #00e5ff;
+  }
+  92% {
+    transform: translateX(2px);
+    text-shadow:
+      -2px 0 #ff6d00,
+      2px 0 #00e5ff;
+  }
+  94% {
+    transform: translateX(-2px);
+    text-shadow:
+      2px 0 #ff6d00,
+      -2px 0 #00e5ff;
+  }
+  96% {
+    transform: none;
+    text-shadow: 0 0 10px #00e5ff;
+  }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 229, 255, 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 2px;
 }
